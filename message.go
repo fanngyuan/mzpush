@@ -26,10 +26,11 @@ type NoticeExpandInfo struct {
 }
 
 type ClickTypeInfo struct {
-	ClickType  int32  `json:"clickType,omitempty"`  // 展开方式 (0, "标准"),(1, "文本")【int 非必填，值为0、1】
-	Url        string `json:"url"`                  // URI页面地址, 【string clickType为打开URI页面时，必填, 长度限制1000】
-	Parameters string `json:"parameters,omitempty"` // 参数 【JSON格式】【非必填】
-	Activity   string `json:"activity"`             // 应用页面地址 【string clickType为打开应用页面时，必填, 长度限制1000】
+	ClickType       int32  `json:"clickType,omitempty"`  // 展开方式 (0, "标准"),(1, "文本")【int 非必填，值为0、1】
+	Url             string `json:"url"`                  // URI页面地址, 【string clickType为打开URI页面时，必填, 长度限制1000】
+	Parameters      string `json:"parameters,omitempty"` // 参数 【JSON格式】【非必填】
+	Activity        string `json:"activity"`             // 应用页面地址 【string clickType为打开应用页面时，必填, 长度限制1000】
+	CustomAttribute string `json:"customAttribute"`
 }
 
 type PushTimeInfo struct {

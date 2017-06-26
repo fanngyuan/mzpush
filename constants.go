@@ -13,4 +13,5 @@ const (
 	TaskNotificationSendURL = "/garcia/api/server/push/task/varnished/pushByPushId"   // taskId推送接口（通知栏消息）
 	AppSendURL              = "/garcia/api/server/push/pushTask/pushToApp"            // appId推送接口
 	TaskCancelURL           = "/garcia/api/server/push/pushTask/cancel"               // 推送取消接口（只针对taskId推送接口和appId推送接口?）
+	TagPushURL              = "/garcia/api/server/push/pushTask/pushToTag"            //按Tag推送
 )

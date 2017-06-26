@@ -4,6 +4,10 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
+	"strings"
+
+	log "github.com/golang/glog"
 	//"fmt"
 	"net/url"
 	"sort"
@@ -29,18 +33,22 @@ func (m *MzPush) ThroughSend(msg *ThroughMessage, pushIds string) (*SendResult, 
 	params.Add("pushIds", pushIds)
 	msgStr, err := json.Marshal(msg)
 	if err != nil {
+		log.Warning(err)
 		return nil, err
 	}
 	params.Add("messageJson", string(msgStr))
 	sign := m.signStr(params)
 	params.Add("sign", sign)
-	bytes, err := doPost(Host+PushThroughSendURL, params)
+
+	bytes, err := doPost(fmt.Sprintf("%s%s", Host, PushThroughSendURL), params)
 	if err != nil {
+		log.Warning(err)
 		return nil, err
 	}
 	var result SendResult
 	err = json.Unmarshal(bytes, &result)
 	if err != nil {
+		log.Warning(err)
 		return nil, err
 	}
 	return &result, nil
@@ -53,12 +61,13 @@ func (m *MzPush) NotificationSend(msg *NotificationMessage, pushIds string) (*Se
 	params.Add("pushIds", pushIds)
 	msgStr, err := json.Marshal(msg)
 	if err != nil {
+		log.Warning(err)
 		return nil, err
 	}
 	params.Add("messageJson", string(msgStr))
 	sign := m.signStr(params)
 	params.Add("sign", sign)
-	bytes, err := doPost(Host+PushNotificationSendURL, params)
+	bytes, err := doPost(fmt.Sprintf("%s%s", Host, PushNotificationSendURL), params)
 	if err != nil {
 		return nil, err
 	}
@@ -77,18 +86,21 @@ func (m *MzPush) GetThroughTask(msg *ThroughMessage) (*SendResult, error) {
 	params.Add("pushType", "1")
 	msgStr, err := json.Marshal(msg)
 	if err != nil {
+		log.Warning(err)
 		return nil, err
 	}
 	params.Add("messageJson", string(msgStr))
 	sign := m.signStr(params)
 	params.Add("sign", sign)
-	bytes, err := doPost(Host+GetTaskURL, params)
+	bytes, err := doPost(fmt.Sprintf("%s%s", Host, GetTaskURL), params)
 	if err != nil {
+		log.Warning(err)
 		return nil, err
 	}
 	var result SendResult
 	err = json.Unmarshal(bytes, &result)
 	if err != nil {
+		log.Warning(err)
 		return nil, err
 	}
 	return &result, nil
@@ -101,18 +113,21 @@ func (m *MzPush) GetNotificationTask(msg *NotificationMessage) (*SendResult, err
 	params.Add("pushType", "0")
 	msgStr, err := json.Marshal(msg)
 	if err != nil {
+		log.Warning(err)
 		return nil, err
 	}
 	params.Add("messageJson", string(msgStr))
 	sign := m.signStr(params)
 	params.Add("sign", sign)
-	bytes, err := doPost(Host+GetTaskURL, params)
+	bytes, err := doPost(fmt.Sprintf("%s%s", Host, GetTaskURL), params)
 	if err != nil {
+		log.Warning(err)
 		return nil, err
 	}
 	var result SendResult
 	err = json.Unmarshal(bytes, &result)
 	if err != nil {
+		log.Warning(err)
 		return nil, err
 	}
 	return &result, nil
@@ -132,13 +147,15 @@ func (m *MzPush) TaskSend(pushType int, taskId, pushIds string) (*SendResult, er
 	} else {
 		TaskSendURL = TaskNotificationSendURL
 	}
-	bytes, err := doPost(Host+TaskSendURL, params)
+	bytes, err := doPost(fmt.Sprintf("%s%s", Host, TaskSendURL), params)
 	if err != nil {
+		log.Warning(err)
 		return nil, err
 	}
 	var result SendResult
 	err = json.Unmarshal(bytes, &result)
 	if err != nil {
+		log.Warning(err)
 		return nil, err
 	}
 	return &result, nil
@@ -151,18 +168,21 @@ func (m *MzPush) AppSend(msg interface{}, pushType int) (*SendResult, error) {
 	params.Add("pushType", strconv.Itoa(pushType))
 	msgStr, err := json.Marshal(msg)
 	if err != nil {
+		log.Warning(err)
 		return nil, err
 	}
 	params.Add("messageJson", string(msgStr))
 	sign := m.signStr(params)
 	params.Add("sign", sign)
-	bytes, err := doPost(Host+AppSendURL, params)
+	bytes, err := doPost(fmt.Sprintf("%s%s", Host, AppSendURL), params)
 	if err != nil {
+		log.Warning(err)
 		return nil, err
 	}
 	var result SendResult
 	err = json.Unmarshal(bytes, &result)
 	if err != nil {
+		log.Warning(err)
 		return nil, err
 	}
 	return &result, nil
@@ -176,13 +196,44 @@ func (m *MzPush) CancelTask(pushType int, taskId string) (*SendResult, error) {
 	params.Add("taskId", taskId)
 	sign := m.signStr(params)
 	params.Add("sign", sign)
-	bytes, err := doPost(Host+TaskCancelURL, params)
+	bytes, err := doPost(fmt.Sprintf("%s%s", Host, TaskCancelURL), params)
 	if err != nil {
+		log.Warning(err)
 		return nil, err
 	}
 	var result SendResult
 	err = json.Unmarshal(bytes, &result)
 	if err != nil {
+		log.Warning(err)
+		return nil, err
+	}
+	return &result, nil
+}
+
+// Tag推送
+func (m *MzPush) PushToTag(msg *NotificationMessage, tagNames []string) (*SendResult, error) {
+	params := url.Values{}
+	params.Add("appId", m.appId)
+	params.Add("pushType", "0")
+	params.Add("tagNames", strings.Join(tagNames, ","))
+	params.Add("scope", "1")
+	msgStr, err := json.Marshal(msg)
+	if err != nil {
+		log.Warning(err)
+		return nil, err
+	}
+	params.Add("messageJson", string(msgStr))
+	sign := m.signStr(params)
+	params.Add("sign", sign)
+	bytes, err := doPost(fmt.Sprintf("%s%s", Host, TagPushURL), params)
+	if err != nil {
+		log.Warning(err)
+		return nil, err
+	}
+	var result SendResult
+	err = json.Unmarshal(bytes, &result)
+	if err != nil {
+		log.Warning(err)
 		return nil, err
 	}
 	return &result, nil
